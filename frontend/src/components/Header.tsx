@@ -4,6 +4,10 @@ const Header = () => (
     <p className="text-gray-500 mt-2">
       A demo using Gemini to check messages for offensive content.
     </p>
+    <p className="text-gray-500 mt-2">
+      Please note that this is a demo and may not be accurate, and the AI's
+      response depends on the model used.
+    </p>
   </header>
 );
 
