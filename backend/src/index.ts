@@ -1,22 +1,34 @@
-import { Elysia, t } from "elysia";
+import { cors } from "@elysiajs/cors";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Elysia, t } from "elysia";
 
 // Initialize Gemini AI
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY is not defined. Please set it in your .env file.");
+  throw new Error(
+    "GEMINI_API_KEY is not defined. Please set it in your .env file."
+  );
 }
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 const app = new Elysia()
+  // Use CORS plugin
+  .use(
+    cors({
+      origin: "http://localhost:5173", // Allow frontend origin
+      methods: ["POST"], // Allow only POST requests
+    })
+  )
   .onError(({ code, error }) => {
     return new Response(error.toString(), { status: 500 });
   })
-  .post("/moderate", async ({ body }) => {
-    const { message } = body;
+  .post(
+    "/moderate",
+    async ({ body }) => {
+      const { message } = body;
 
-    const prompt = `
+      const prompt = `
       You are an advanced AI content moderator for a live streaming platform. Your task is to analyze a user's message and determine if it contains any offensive content.
       Analyze the following message: "${message}"
 
@@ -30,23 +42,31 @@ const app = new Elysia()
       }
     `;
 
-    try {
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      let text = response.text();
+      try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let text = response.text();
 
-      // Clean the response from markdown and extra spaces
-      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        // Clean the response from markdown and extra spaces
+        text = text
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+          .trim();
 
-      // Parse the JSON string into an object
-      const jsonResponse = JSON.parse(text);
-      return jsonResponse;
-
-    } catch (error) {
-      console.error("Error calling Gemini API:", error);
-      throw new Error("Failed to get moderation result from AI.");
+        // Parse the JSON string into an object
+        const jsonResponse = JSON.parse(text);
+        return jsonResponse;
+      } catch (error) {
+        console.error("Error calling Gemini API:", error);
+        throw new Error("Failed to get moderation result from AI.");
+      }
+    },
+    {
+      body: t.Object({
+        message: t.String(),
+      }),
     }
-  })
+  )
   .listen(3000);
 
 console.log(
