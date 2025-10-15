@@ -1,6 +1,7 @@
 import { cors } from "@elysiajs/cors";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Elysia, t } from "elysia";
+import { rateLimit } from "elysia-rate-limit";
 
 // Initialize Gemini AI
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -13,6 +14,13 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const app = new Elysia()
+  // Add rate limiting: 10 requests per minute per IP
+  .use(
+    rateLimit({
+      max: 10,
+      duration: 60 * 1000, // 1 minute
+    })
+  )
   .use(
     cors({
       origin: "http://localhost:5173", // Allow frontend origin
