@@ -13,11 +13,10 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const app = new Elysia()
-  // Use CORS plugin
   .use(
     cors({
       origin: "http://localhost:5173", // Allow frontend origin
-      methods: ["POST"], // Allow only POST requests
+      methods: ["POST"],
     })
   )
   .onError(({ code, error }) => {
