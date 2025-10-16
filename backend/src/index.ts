@@ -27,7 +27,7 @@ const app = new Elysia()
   )
   .use(
     cors({
-      origin: "http://localhost:5173", // Allow frontend origin
+      origin: process.env.FRONTEND_URL ?? "http://localhost:5173", // Allow frontend origin
       methods: ["POST"],
     })
   )
