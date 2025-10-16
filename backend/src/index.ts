@@ -2,6 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
+import { SYSTEM_PROMPT } from "./prompt";
 
 // Initialize Gemini AI
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -11,7 +12,10 @@ if (!GEMINI_API_KEY) {
   );
 }
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.0-flash",
+  systemInstruction: SYSTEM_PROMPT,
+});
 
 const app = new Elysia()
   // Add rate limiting: 10 requests per minute per IP
@@ -35,23 +39,11 @@ const app = new Elysia()
     async ({ body }) => {
       const { message } = body;
 
-      const prompt = `
-      You are an advanced AI content moderator for a live streaming platform. Your task is to analyze a user's message and determine if it contains any offensive content.
-      Analyze the following message: "${message}"
-
-      Based on your analysis, you MUST return a JSON object with the following structure, and nothing else. Do not add any introductory text or markdown formatting.
-      {
-        "is_offensive": boolean,
-        "toxicity_level": "None" | "Low" | "Medium" | "High" | "Severe",
-        "offending_words": string[],
-        "reason": string,
-        "suggested_action": "ALLOW" | "REVIEW" | "BLOCK"
-      }
-    `;
+      const prompt = `INPUT: "Message: \"${message}\""`;
 
       try {
         const result = await model.generateContent(prompt);
-        const response = await result.response;
+        const response = result.response;
         let text = response.text();
 
         // Clean the response from markdown and extra spaces
