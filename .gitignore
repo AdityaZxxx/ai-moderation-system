@@ -8,7 +8,7 @@
 /coverage
 
 # Build output
-/dist
+*/dist
 /build
 /.next/
 /out/
