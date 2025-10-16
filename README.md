@@ -7,7 +7,12 @@ This project is a web-based demonstration of an AI-powered content moderation sy
 ## Features
 
 - **Real-time Analysis:** Messages are sent to the backend and analyzed by the Gemini API instantly.
-- **Structured JSON Output:** The AI returns a detailed JSON object, including an offensive flag, toxicity level, offending words, a reason, and a suggested action (ALLOW, REVIEW, BLOCK).
+- **Granular Moderation:** The AI returns a detailed JSON object with a clear action (`allow`, `block`, `replace`, `review`).
+- **Toxicity Scoring:** Provides a numerical `toxicity_score` (0.0-1.0) for nuanced understanding.
+- **Categorization:** Breaks down the analysis into scores for specific categories like `insult`, `hate`, `sexual`, `threat`, and `spam`.
+- **Contextual Reasoning:** Includes a `reason` field explaining *why* a decision was made, including context for cultural or linguistic nuances.
+- **Text Normalization:** Provides a `normalized_text` version of the user's message.
+- **Confidence Score:** Indicates the AI's confidence level in its own analysis.
 
 ---
 
@@ -82,7 +87,7 @@ You will need two separate terminals to run both the backend and frontend server
 
   ```bash
   # In the /backend directory
-  bun run src/index.ts
+  bun run dev
   ```
 
   _The backend server will be running at `http://localhost:3000`._
@@ -101,14 +106,26 @@ You will need two separate terminals to run both the backend and frontend server
 
 ## API Response Structure
 
-The backend `/moderate` endpoint returns a JSON object with the following structure:
+The backend `/moderate` endpoint returns a JSON object with the following detailed structure:
 
 ```json
 {
-  "is_offensive": true,
-  "toxicity_level": "Medium",
-  "offending_words": ["idiot"],
-  "reason": "The message contains a personal insult.",
-  "suggested_action": "BLOCK"
+  "allowed": false,
+  "action_reason": "block",
+  "reason": "The word 'bego' is a common curse word in Indonesian that means 'stupid'.",
+  "toxicity_score": 0.95,
+  "categories": {
+    "insult": 0.95,
+    "hate": 0.0,
+    "sexual": 0.0,
+    "threat": 0.0,
+    "spam": 0.01
+  },
+  "bad_words": [
+    "bego"
+  ],
+  "normalized_text": "dasar bego lu",
+  "suggested_replacement": "",
+  "confidence": 0.92
 }
 ```
