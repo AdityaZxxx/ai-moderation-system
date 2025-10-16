@@ -6,7 +6,7 @@ import type { ModerationResult } from "./types";
 import ErrorDisplay from "./components/ErrorDisplay";
 import Header from "./components/Header";
 import MessageInput from "./components/MessageInput";
-import ResultDisplay from "./components/ResultDisplay";
+import { ResultDisplay } from "./components/ResultDisplay";
 
 function App() {
   const [result, setResult] = useState<ModerationResult | null>(null);
@@ -31,9 +31,8 @@ function App() {
     } catch (err) {
       let errorMessage = "An unknown error occurred.";
       if (axios.isAxiosError(err) && err.response) {
-        errorMessage = `Error from server: ${err.response.data}`
-          .replace(/Error:/g, "")
-          .trim();
+        // Directly use the error message from the server's response
+        errorMessage = err.response.data;
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }

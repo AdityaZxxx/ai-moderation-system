@@ -1,8 +1,17 @@
-// src/types.ts
 export interface ModerationResult {
-  is_offensive: boolean;
-  toxicity_level: "None" | "Low" | "Medium" | "High" | "Severe";
-  offending_words: string[];
+  allowed: boolean;
+  action_reason: "allow" | "block" | "replace" | "review";
   reason: string;
-  suggested_action: "ALLOW" | "REVIEW" | "BLOCK";
+  toxicity_score: number;
+  categories: {
+    insult: number;
+    hate: number;
+    sexual: number;
+    threat: number;
+    spam: number;
+  };
+  bad_words: string[];
+  normalized_text: string;
+  suggested_replacement: string;
+  confidence: number;
 }
